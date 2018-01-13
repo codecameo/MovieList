@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Movie</string>
+    <string name="text_getting_movie_list">Getting Movie List...</string>
+    <string name="action_search">Search</string>
+    <string name="text_nothing_found">Noting Found</string>
+</resources>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <import type="com.example.hp.assessment.network.ApiConstant"/>
+        <variable
+            name="model"
+            type="com.example.hp.assessment.databinding.viewmodels.MovieModel"/>
+    </data>
+    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tool="http://schemas.android.com/tools"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:cardCornerRadius="@dimen/default_radius"
+        app:cardElevation="@dimen/default_elevation"
+        android:layout_margin="@dimen/list_item_padding">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.example.hp.assessment.customviews.CustomImageView
+                android:id="@+id/iv_movie_poster"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/movie_place_holder"
+                app:imageUrl="@{ApiConstant.BASE_IMAGE_URL+model.poster_path}"
+                app:placeholder="@{@drawable/movie_place_holder}" />
+
+            <TextView
+                android:paddingLeft="@dimen/list_item_padding"
+                android:paddingTop="@dimen/list_item_padding"
+                android:textStyle="bold"
+                android:textSize="@dimen/abc_text_size_subhead_material"
+                android:text="@{model.title}"
+                android:id="@+id/tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/title_text_color"
+                tool:text="Avengers" />
+
+            <TextView
+                android:paddingLeft="@dimen/list_item_padding"
+                android:paddingTop="@dimen/list_item_padding"
+                android:textSize="@dimen/abc_text_size_caption_material"
+                android:textColor="@color/content_text_color"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tool:text="Rating 7.9 (1343)"
+                android:text="@{`Rating: `+model.vote_average+ `/10 (`+model.vote_count+`)`}"/>
+
+            <TextView
+                android:padding="@dimen/list_item_padding"
+                android:textSize="@dimen/abc_text_size_caption_material"
+                android:id="@+id/tv_overview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                tool:text="OverView"
+                android:text="@{``+model.overview}"/>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+</layout>
