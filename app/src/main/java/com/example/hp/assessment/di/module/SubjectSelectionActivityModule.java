@@ -7,7 +7,7 @@ import dagger.Module;
  */
 
 @Module
-public class SubjectSelectionActivityModule {
+public class  SubjectSelectionActivityModule {
 
     /*@Provides
     SubjectSelectionViewModel provideSubjectSelectionViewModel(MovieListRepo subjectRepo) {

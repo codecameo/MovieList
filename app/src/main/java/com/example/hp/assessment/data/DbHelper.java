@@ -4,6 +4,8 @@ import com.example.hp.assessment.dbhelper.entities.MovieEntity;
 
 import java.util.List;
 
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 
 /**
@@ -11,6 +13,6 @@ import io.reactivex.Single;
  */
 
 public interface DbHelper {
-    Single<List<MovieEntity>> getMovieList();
+    Flowable<List<MovieEntity>> getMovieList();
     void insertMovieListEntity(List<MovieEntity> subjectEntities);
 }

@@ -10,8 +10,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Md. Sifat-Ul Haque on 12/01/2018.
@@ -31,14 +35,13 @@ public class MovieViewModel extends BaseViewModel {
     /*
     * Fetch Movie list from repo
     * */
-    public Single<List<MovieModel>> getMovieList(boolean isFirst) {
-        if (isFirst)
-            return mMovieRepo.getInitMovieList();
-        else
-            return loadMoreMovieList();
+    public Flowable<List<MovieModel>> getInitMovieList() {
+        return mMovieRepo.getInitMovieList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<List<MovieModel>> loadMoreMovieList() {
+    public Completable loadMoreMovieList() {
         return mMovieRepo.getApiMovieList(mCurrentPage);
     }
 
@@ -52,5 +55,11 @@ public class MovieViewModel extends BaseViewModel {
 
     public Observable<ArrayList<MovieModel>> searchMovie(CharSequence query) {
         return mMovieRepo.searchMovie((String) query);
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        Log.d(TAG, "onCleared: ");
     }
 }

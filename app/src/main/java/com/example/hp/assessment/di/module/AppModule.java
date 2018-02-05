@@ -77,8 +77,10 @@ public class AppModule {
 
     @Provides
     @Singleton
-    ProjectDB provideAppDatabase(@DatabaseInfo String dbName, @ApplicationContext Context context) {
-        return Room.databaseBuilder(context, ProjectDB.class, dbName).fallbackToDestructiveMigration()
+    ProjectDB provideAppDatabase(@DatabaseInfo String dbName,
+                                 @ApplicationContext Context context) {
+        return Room.databaseBuilder(context, ProjectDB.class, dbName)
+                .fallbackToDestructiveMigration()
                 .build();
     }
 

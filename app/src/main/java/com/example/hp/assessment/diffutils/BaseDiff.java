@@ -33,6 +33,4 @@ public abstract class BaseDiff<Model> extends DiffUtil.Callback {
     public int getNewListSize() {
         return mNewList.size();
     }
-
-
 }

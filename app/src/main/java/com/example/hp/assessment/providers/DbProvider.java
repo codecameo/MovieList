@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 
 /**
@@ -24,7 +26,7 @@ public class DbProvider implements DbHelper {
     }
 
     @Override
-    public Single<List<MovieEntity>> getMovieList() {
+    public Flowable<List<MovieEntity>> getMovieList() {
         return mAppDatabase.getMovieDao().getAllMovies();
     }
 

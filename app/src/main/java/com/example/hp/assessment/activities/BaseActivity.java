@@ -27,7 +27,6 @@ import io.reactivex.disposables.CompositeDisposable;
 /**
  * Created by Md. Sifat-Ul Haque on 12/01/2018.
  */
-
 public abstract class BaseActivity<DB extends ViewDataBinding, VM extends ViewModel> extends AppCompatActivity {
 
     private static final String TAG = "BaseActivity";
@@ -49,7 +48,6 @@ public abstract class BaseActivity<DB extends ViewDataBinding, VM extends ViewMo
         performDependencyInjection();
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, getLayoutRes());
-        //mViewModel = (VM) ViewModelProviders.of(this, viewModelFactory).get(mViewModel.getClass());
     }
 
     /**
@@ -116,7 +114,6 @@ public abstract class BaseActivity<DB extends ViewDataBinding, VM extends ViewMo
         if (progressDialog == null) {
             initProgressLoader();
         }
-
         progressDialog.setMessage(message);
         progressDialog.show();
     }

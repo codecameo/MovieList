@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 /**
@@ -34,7 +35,7 @@ public class AppDataProvider implements DataManager {
     }
 
     @Override
-    public Single<List<MovieEntity>> getMovieList() {
+    public Flowable<List<MovieEntity>> getMovieList() {
         return mDbHelper.getMovieList();
     }
 

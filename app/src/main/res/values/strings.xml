@@ -3,4 +3,5 @@
     <string name="text_getting_movie_list">Getting Movie List...</string>
     <string name="action_search">Search</string>
     <string name="text_nothing_found">Noting Found</string>
+    <string name="error_unable_loading">Unable to load more</string>
 </resources>

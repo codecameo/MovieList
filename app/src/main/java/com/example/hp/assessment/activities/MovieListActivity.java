@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
@@ -18,33 +17,35 @@ import com.example.hp.assessment.adpters.MovieListAdapter;
 import com.example.hp.assessment.databinding.ActivityMainBinding;
 import com.example.hp.assessment.databinding.viewmodels.MovieModel;
 import com.example.hp.assessment.utils.ListUtils;
+import com.example.hp.assessment.utils.Utils;
 import com.example.hp.assessment.viewmodels.MovieViewModel;
 import com.jakewharton.rxbinding2.support.v7.widget.RxSearchView;
 
+import org.reactivestreams.Subscription;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subscribers.DisposableSubscriber;
 
 public class MovieListActivity extends BaseActivity<ActivityMainBinding, MovieViewModel> implements MovieListAdapter.OnLoadMoreCallBack {
 
     private static final String TAG = "MovieListActivity";
     private static final long SEARCH_DEBOUNCE_TIMEOUT = 500;
     private MovieListAdapter mMovieListAdapter;
-    private boolean isInitData = true, isLoading;
+    private boolean isLoading;
     private MenuItem mSearchMenu;
     private SearchView mSearchView;
     private CharSequence mQueryString;
@@ -77,48 +78,73 @@ public class MovieListActivity extends BaseActivity<ActivityMainBinding, MovieVi
     * Fetch initial movie list. First check from DB. If there is no movie in the DB call Api to fetch new list
     * */
     private void fetchInitialMovieList() {
-        mCompositeDisposable.add(mViewModel.getMovieList(isInitData)
+        mCompositeDisposable.add(mViewModel.getInitMovieList()
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(new Consumer<Disposable>() {
+                .doOnSubscribe(new Consumer<Subscription>() {
                     @Override
-                    public void accept(Disposable disposable) throws Exception {
-                        if (isInitData) {
-                            showProgressDialog(getString(R.string.text_getting_movie_list));
-                            setProgressCancelable(false);
-                        }
+                    public void accept(Subscription subscription) throws Exception {
+                        showProgressDialog(getString(R.string.text_getting_movie_list));
+                        setProgressCancelable(false);
                         isLoading = true;
                     }
-                })
-                .doAfterTerminate(new Action() {
+                }).doAfterTerminate(new Action() {
                     @Override
                     public void run() throws Exception {
-                        cancelProgressDialog();
                         isLoading = false;
                     }
                 })
-                .subscribeWith(new DisposableSingleObserver<List<MovieModel>>() {
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSubscriber<List<MovieModel>>() {
                     @Override
-                    public void onSuccess(List<MovieModel> movieModels) {
+                    public void onNext(List<MovieModel> movieModels) {
                         Log.d(TAG, "onSuccess: " + movieModels.size());
+                        cancelProgressDialog();
+                        isLoading = false;
                         if (!ListUtils.isEmpty(movieModels)) {
                             mViewModel.incrementCurrentPage();
-                            mMovieListAdapter.addData((ArrayList<MovieModel>) movieModels);
-                            isInitData = false;
+                            mMovieListAdapter.setData((ArrayList<MovieModel>) movieModels);
                         }
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-                        Log.d(TAG, "onError: " + e.getMessage());
-                    }
+                    public void onError(Throwable e) {}
+
+                    @Override
+                    public void onComplete() {}
                 }));
     }
 
     @Override
     public void onLoadMore() {
         if (!isLoading)
-            fetchInitialMovieList();
+            loadMovieList();
+    }
+
+    private void loadMovieList() {
+        mCompositeDisposable.add(mViewModel.loadMoreMovieList()
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(Disposable disposable) throws Exception {
+                        isLoading = true;
+                    }
+                })
+                .doAfterTerminate(new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        isLoading = false;
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableCompletableObserver(){
+                    @Override
+                    public void onComplete() {}
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Utils.showToast(MovieListActivity.this, getString(R.string.error_unable_loading));
+                    }
+                }));
     }
 
 
@@ -146,7 +172,7 @@ public class MovieListActivity extends BaseActivity<ActivityMainBinding, MovieVi
 
         mCompositeDisposable.add(RxSearchView.queryTextChanges(mSearchView)
                 .debounce(SEARCH_DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
-                .flatMap(new Function<CharSequence, Observable<ArrayList<MovieModel>>>() {
+                .switchMap(new Function<CharSequence, Observable<ArrayList<MovieModel>>>() {
                     @Override
                     public Observable<ArrayList<MovieModel>> apply(CharSequence charSequence) throws Exception {
                         Log.d(TAG, "apply: " + charSequence);
@@ -164,14 +190,13 @@ public class MovieListActivity extends BaseActivity<ActivityMainBinding, MovieVi
                         Log.d(TAG, "Search onNext: " + movieModels.size());
                         if (TextUtils.isEmpty(mQueryString)){
                             mMovieListAdapter.revert();
-                            showList();
+                            mBinding.setEmptyPlaceHolderEnable(false);
                         }else {
                             mMovieListAdapter.setData(movieModels);
                             if (ListUtils.isEmpty(movieModels)){
-                                hideList();
-                            }
-                            else {
-                                showList();
+                                mBinding.setEmptyPlaceHolderEnable(true);
+                            } else {
+                                mBinding.setEmptyPlaceHolderEnable(false);
                             }
                         }
                     }
@@ -183,17 +208,5 @@ public class MovieListActivity extends BaseActivity<ActivityMainBinding, MovieVi
                     public void onComplete() {}
                 }));
         return true;
-    }
-
-    private void hideList() {
-        mBinding.rvMovieList.setVisibility(View.GONE);
-        mBinding.tvNothingFound.setVisibility(View.VISIBLE);
-        mBinding.ivNothingFound.setVisibility(View.VISIBLE);
-    }
-
-    private void showList() {
-        mBinding.rvMovieList.setVisibility(View.VISIBLE);
-        mBinding.tvNothingFound.setVisibility(View.GONE);
-        mBinding.ivNothingFound.setVisibility(View.GONE);
     }
 }

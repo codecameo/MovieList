@@ -65,7 +65,6 @@ public class MovieListAdapter extends BaseRecyclerAdapter<MovieListAdapter.ViewH
         public ViewHolder(ItemMovieListBinding binding) {
             super(binding.getRoot());
             mBinding = binding;
-            //mBinding.setCallback(new SubjectSelectionCallback());
         }
 
         public void bind() {
@@ -78,10 +77,12 @@ public class MovieListAdapter extends BaseRecyclerAdapter<MovieListAdapter.ViewH
         DiffUtil.DiffResult result = DiffUtil.calculateDiff(new MovieListDiff(mMovieLists, movieList));
         mMovieLists.clear();
         mMovieLists.addAll(movieList);
+        mTempMovieModels.clear();
+        mTempMovieModels.addAll(mMovieLists);
         result.dispatchUpdatesTo(listUpdateCallback);
     }
 
-    public void addData(ArrayList<MovieModel> movieList){
+    public void addData(ArrayList<MovieModel> movieList) {
         if (ListUtils.isEmpty(movieList)) return;
 
         mTempMovieModels.clear();
@@ -93,8 +94,6 @@ public class MovieListAdapter extends BaseRecyclerAdapter<MovieListAdapter.ViewH
         mMovieLists.addAll(movieList);
         result.dispatchUpdatesTo(listUpdateCallback);
     }
-
-
 
     public interface OnLoadMoreCallBack{
         void onLoadMore();

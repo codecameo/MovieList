@@ -11,6 +11,8 @@ import com.example.hp.assessment.dbhelper.entities.MovieEntity;
 
 import java.util.List;
 
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 
 /**
@@ -29,8 +31,8 @@ public interface MovieDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     long createMovieIfNotExists(MovieEntity subject);
 
-    @Query("SELECT * FROM "+ DbConstants.MOVIE_TABLE_NAME)
-    Single<List<MovieEntity>> getAllMovies();
+    @Query("SELECT * FROM "+ DbConstants.MOVIE_TABLE_NAME+" ORDER BY vote_average DESC")
+    Flowable<List<MovieEntity>> getAllMovies();
 
     /*@Query("SELECT * FROM "+ DbConstants.MOVIE_TABLE_NAME+" WHERE user_id = :id LIMIT 1")
     LiveData<MovieEntity> getSubject(int id);
